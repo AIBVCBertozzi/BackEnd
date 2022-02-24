@@ -83,6 +83,18 @@ namespace API_AIBVC.Controllers
             else
                 return StatusCode(500, new InfoMsg(DateTime.Today, $"Errore nella creazione del torneo"));
         }
+        [HttpPut("ModificaTorneo")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200, Type = typeof(DataTable))]
+        [Authorize(Roles = "Societa,Admin")]
+        public ActionResult<InfoMsg> UpdateTorneo([FromBody] AddTorneo torneo)
+        {
+            if (db.UpdateTorneo(torneo.IDTorneo,torneo.Titolo, torneo.Tour, torneo.PuntiVittoria, torneo.Montepremi, Convert.ToDateTime(torneo.DataChiusuraIscrizioni), Convert.ToDateTime(torneo.DataInizio), Convert.ToDateTime(torneo.DataFine), torneo.Genere, torneo.FormulaTorneo, torneo.NumMaxTeamMainDraw, torneo.NumMaxTeamQualifiche, torneo.ParametriTorneo, torneo.TipoTorneo, torneo.QuotaIscrizione, torneo.IDSocieta, torneo.NumTeamQualificati, torneo.NumWildCard, torneo.IDImpianto, torneo.Outdoor, torneo.RiunioneTecnica, torneo.OraInizio))
+                return Ok(new InfoMsg(DateTime.Today, $"Torneo modificato con successo"));
+            else
+                return StatusCode(500, new InfoMsg(DateTime.Today, $"Errore nella modifica del torneo"));
+        }
 
         //crea una nuova squadra se non esite gia
         [HttpPost("InserisciSquadra")]
@@ -475,16 +487,6 @@ namespace API_AIBVC.Controllers
                 return Ok(new InfoMsg(DateTime.Today, $"Info modificate con successo"));
             else
                 return StatusCode(500, new InfoMsg(DateTime.Today, $"Errore durante la modifica delle informazioni"));
-        }
-
-        [HttpPut("UpdateInfoTorneo")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(200, Type = typeof(DataTable))]
-        [Authorize(Roles = "Societa,Delegato,Admin")]
-        public string UpdateInfoTorneo([FromBody]AddTorneo modTorneo)
-        {
-            return db.UpdateTorneo(modTorneo.Titolo, modTorneo.PuntiVittoria, modTorneo.Montepremi, Convert.ToDateTime(modTorneo.DataChiusuraIscrizioni), Convert.ToDateTime(modTorneo.DataInizio), Convert.ToDateTime(modTorneo.DataFine), modTorneo.Genere, modTorneo.IDFormulaTorneo, modTorneo.NumMaxTeamMainDraw, modTorneo.NumMaxTeamQualifiche, modTorneo.IDParametriTorneo, modTorneo.IDTipoTorneo, modTorneo.QuotaIscrizione, modTorneo.IDSocieta, modTorneo.NumTeamQualificati, modTorneo.NumWildCard, modTorneo.IDImpianto, modTorneo.Outdoor, modTorneo.RiunioneTecnica, modTorneo.OraInizio, modTorneo.IDSupervisore, modTorneo.IDSupArbitrale, modTorneo.IDDirettore, Convert.ToDateTime(modTorneo.DataPubblicazioneLista), modTorneo.VisibilitaListaIngresso, modTorneo.UrlLocandina, modTorneo.IDTorneo);
         }
 
         [HttpPost("CreaListaIngresso/{IDTorneo}/Supervisore/{IDSupervisore}")]

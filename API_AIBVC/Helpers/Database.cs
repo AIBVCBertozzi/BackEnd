@@ -2447,6 +2447,154 @@ namespace WebAPIAuthJWT.Helpers
                 return false;
             }
         }
+        public bool UpdateTorneo(int idT,string titolo, string Tour, int puntiVittoria, double montepremi, DateTime dataChiusuraIscrizioni, DateTime dataInizio, DateTime dataFine, char genere, string formulaTorneo, int NumMaxTeamMainDraw, int NumMaxTeamQualifiche, string[] parametriTorneo, string tipoTorneo, double quotaIscrizione, int idSocieta, int numTeamQualificati, int numWildCard, int idImpianto, bool outdoor, bool riunioneTecnica, string oraInizio)
+        {
+            SqlDataAdapter adapter;
+            SqlCommand comando;
+            SqlParameter parametro;
+            DataTable query;
+            string sql;
+            DataTable idTorneo;
+            List<int> idParametriTorneo = new List<int>();
+            List<int> idImpianti = new List<int>();
+            try
+            {
+                //Creo il torneo
+                sql = "";
+                sql += "UPDATE Torneo SET ";
+                sql += "IDSocieta=@IDSocieta," +
+                    "IDTipoTorneo=@IDTipoTorneo," +
+                    "IDFormula=@IDFormula," +
+                    "Titolo=@Titolo," +
+                    "PuntiVittoria=@PuntiVittoria," +
+                    "Montepremi=@Montepremi," +
+                    "DataChiusuraIscrizioni=@DataChiusuraIScrizioni," +
+                    "DataInizio=@DataInzio," +
+                    "DataFine=@DataFine," +
+                    "Gender=@Gender," +
+                    "NumMaxTeamMainDraw=@NumMaxTeamMainDraw," +
+                    "NumMaxTeamQualifiche=@NumMaxTeamQualifiche," +
+                    "QuotaIscrizione=@QuotaIscrizione," +
+                    "NumTeamQualificati=@NumTeamQualificati," +
+                    "NumWildCard=@NumWildCard," +
+                    "IDImpianto=@IDImpianto," +
+                    "Outdoor=@Outdoor," +
+                    "RiunioneTecnica=@RiunioneTecnica," +
+                    "OraInizio=@OraInizio," +
+                    "Tour=@Tour ";
+                sql += "WHERE IDTorneo=@idtorneo;";
+                comando = new SqlCommand(sql, conn);
+                parametro = new SqlParameter("idtorneo", idT);
+                comando = new SqlCommand(sql, conn);
+                parametro = new SqlParameter("IDSocieta", idSocieta);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("IDTipoTorneo", tipoTorneo);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("IDFormula", formulaTorneo);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("Titolo", titolo);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("PuntiVittoria", puntiVittoria);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("Montepremi", montepremi);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("DataChiusuraIScrizioni", dataChiusuraIscrizioni.Date);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("DataInzio", dataInizio.Date);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("DataFine", dataFine.Date);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("Gender", genere);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("NumMaxTeamMainDraw", NumMaxTeamMainDraw);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("NumMaxTeamQualifiche", NumMaxTeamQualifiche);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("QuotaIscrizione", quotaIscrizione);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("NumTeamQualificati", numTeamQualificati);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("NumWildCard", numWildCard);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("IDImpianto", idImpianto);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("Outdoor", outdoor);
+                comando.Parameters.Add(parametro);
+                parametro = new SqlParameter("RiunioneTecnica", riunioneTecnica);
+                comando.Parameters.Add(parametro);
+                if (oraInizio != null)
+                    parametro = new SqlParameter("OraInizio", oraInizio);
+                else
+                    parametro = new SqlParameter("OraInizio", DBNull.Value);
+                comando.Parameters.Add(parametro);
+                if (Tour != null)
+                    parametro = new SqlParameter("Tour", Tour);
+                else
+                    parametro = new SqlParameter("Tour", DBNull.Value);
+                comando.Parameters.Add(parametro);
+                conn.Open();
+                comando.ExecuteNonQuery();
+                conn.Close();
+               
+                //Trovo gli ID dei parametri
+                for (int i = 0; i < parametriTorneo.Length; i++)
+                {
+                    sql = "";
+                    sql += "SELECT IDParametro FROM ParametroQualita WHERE NomeParametro=@ParametriTorneo";
+                    comando = new SqlCommand(sql, conn);
+                    comando.Parameters.Add(new SqlParameter("ParametriTorneo", parametriTorneo[i]));
+                    query = new DataTable();
+                    adapter = new SqlDataAdapter(comando);
+                    conn.Open();
+                    adapter.Fill(query);
+                    conn.Close();
+                    if (query.Rows.Count > 0)
+                        idParametriTorneo.Add(Convert.ToInt32(query.Rows[0][0]));
+                }
+                //Prendo l'IDTorneo
+                sql = "";
+                sql += "SELECT IDTorneo FROM Torneo WHERE Titolo=@titolotorneo";
+                comando = new SqlCommand(sql, conn);
+                comando.Parameters.Add(new SqlParameter("titolotorneo", titolo));
+                idTorneo = new DataTable();
+                adapter = new SqlDataAdapter(comando);
+                conn.Open();
+                adapter.Fill(idTorneo);
+                conn.Close();
+                //elimino tutti i parametri
+                sql = "";
+                sql += "DELETE FROM ParametroTorneo WHERE IDTorneo=@IDTorneo;";
+                comando = new SqlCommand(sql, conn);
+                parametro = new SqlParameter("IDTorneo", idTorneo.Rows[0][0]);
+                comando.Parameters.Add(parametro);
+                conn.Open();
+                comando.ExecuteNonQuery();
+                conn.Close();
+                //Assegno i parametri al torneo
+                if (idParametriTorneo.Count > 0)
+                {
+                    for (int i = 0; i < idParametriTorneo.Count; i++)
+                    {
+                        sql = "";
+                        sql += "INSERT INTO ParametroTorneo(IDTorneo,IDParametro) VALUES(@IDTorneo,@IDParametro)";
+                        comando = new SqlCommand(sql, conn);
+                        parametro = new SqlParameter("IDTorneo", idTorneo.Rows[0][0]);
+                        comando.Parameters.Add(parametro);
+                        parametro = new SqlParameter("IDParametro", idParametriTorneo[i]);
+                        comando.Parameters.Add(parametro);
+                        conn.Open();
+                        comando.ExecuteNonQuery();
+                        conn.Close();
+                    }
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                string errore = e.Message;
+                return false;
+            }
+        }
         public string RecuperaPassword(string email)
         {
             try
@@ -5517,90 +5665,6 @@ namespace WebAPIAuthJWT.Helpers
             catch (Exception e)
             {
                 return false;
-            }
-        }
-        //Metodo per modificare le info del torneo
-        public string UpdateTorneo(string titolo, int puntiVittoria, double montepremi, DateTime dataChiusuraIscrizioni, DateTime dataInizio, DateTime dataFine, char genere, int idFormulaTorneo, int NumMaxTeamMainDraw, int NumMaxTeamQualifiche, int[] idParametriTorneo, int idTipoTorneo, double quotaIscrizione, int idSocieta, int numTeamQualificati, int numWildCard, int idImpianto, bool outdoor, bool riunioneTecnica, string oraInizio, int idSupervisore, int idSupArbitrale, int idDirettore, DateTime dataPubblicazioneLista, int visibilitaListaIngresso, string urlLocandina, int idTorneo)
-        {
-            string sql;
-            SqlCommand comando;
-            try
-            {
-
-                //Cambio i dati del torneo
-                sql = "";
-                sql += "UPDATE Torneo " +
-                    "SET IDSocieta=@IDSocieta," +
-                    "IDImpianto=@IDImpianto," +
-                    "IDTipoTorneo=@IDTipoTorneo," +
-                    "IDSupervisore=@IDSupervisore," +
-                    "IDSupervisoreArbitrale=@IDSupervisoreArbitrale," +
-                    "IDDirettoreCompetizione=@IDDirettoreCompetizione," +
-                    "IDFormula=@IDFormula," +
-                    "Titolo=@Titolo," +
-                    "QuotaIscrizione=@QuotaIscrizione," +
-                    "PuntiVittoria=@PuntiVittoria," +
-                    "Montepremi=@Montepremi," +
-                    "DataChiusuraIscrizioni=@DataChiusuraIscrizioni," +
-                    "DataPubblicazioneLista=@DataPubblicazioneLista," +
-                    "DataInizio=@DataInizio," +
-                    "OraInizio=@OraInizio," +
-                    "RiunioneTecnica=@RiunioneTecnica," +
-                    "DataFine=@DataFine," +
-                    "Gender=@Gender," +
-                    "Outdoor=@Outdoor," +
-                    "VisibilitaListaIngresso=@VisibilitaListaIngresso," +
-                    "NumMaxTeamMainDraw=@NumMaxTeamMainDraw," +
-                    "NumMaxTeamQualifiche=@NumMaxTeamQualifiche," +
-                    "NumTeamQualificati=@NumMaxTeamQualifiche," +
-                    "NumWildCard=@NumWildCard," +
-                    "URL_Locanina=@URL_Locanina " +
-                    "WHERE IDTorneo=@IDTorneo";
-                comando = new SqlCommand(sql, conn);
-                comando.Parameters.Add(new SqlParameter("IDSocieta", idSocieta));
-                comando.Parameters.Add(new SqlParameter("IDImpianto", idImpianto));
-                comando.Parameters.Add(new SqlParameter("IDTipoTorneo", idTipoTorneo));
-                comando.Parameters.Add(new SqlParameter("IDSupervisore", idSupervisore));
-                comando.Parameters.Add(new SqlParameter("IDSupervisoreArbitrale", idSupArbitrale));
-                comando.Parameters.Add(new SqlParameter("IDDirettoreCompetizione", idDirettore));
-                comando.Parameters.Add(new SqlParameter("IDFormula", idFormulaTorneo));
-                comando.Parameters.Add(new SqlParameter("Titolo", titolo));
-                comando.Parameters.Add(new SqlParameter("QuotaIscrizione", quotaIscrizione));
-                comando.Parameters.Add(new SqlParameter("PuntiVittoria", puntiVittoria));
-                comando.Parameters.Add(new SqlParameter("Montepremi", montepremi));
-                comando.Parameters.Add(new SqlParameter("DataChiusuraIscrizioni", dataChiusuraIscrizioni.Date));
-                comando.Parameters.Add(new SqlParameter("DataPubblicazioneLista", dataPubblicazioneLista.Date));
-                comando.Parameters.Add(new SqlParameter("DataInizio", dataInizio.Date));
-                comando.Parameters.Add(new SqlParameter("OraInizio", oraInizio));
-                comando.Parameters.Add(new SqlParameter("RiunioneTecnica", riunioneTecnica));
-                comando.Parameters.Add(new SqlParameter("DataFine", dataFine.Date));
-                comando.Parameters.Add(new SqlParameter("Gender", genere));
-                comando.Parameters.Add(new SqlParameter("Outdoor", outdoor));
-                comando.Parameters.Add(new SqlParameter("VisibilitaListaIngresso", visibilitaListaIngresso));
-                comando.Parameters.Add(new SqlParameter("NumMaxTeamMainDraw", NumMaxTeamMainDraw));
-                comando.Parameters.Add(new SqlParameter("NumMaxTeamQualifiche", NumMaxTeamQualifiche));
-                comando.Parameters.Add(new SqlParameter("NumTeamQualificati", numTeamQualificati));
-                comando.Parameters.Add(new SqlParameter("NumWildCard", numWildCard));
-                comando.Parameters.Add(new SqlParameter("URL_Locanina", urlLocandina));
-                comando.Parameters.Add(new SqlParameter("IDTorneo", idTorneo));
-                conn.Open();
-                comando.ExecuteNonQuery();
-                conn.Close();
-                //Cambio i parametri
-                //Tocca capire come inserire tutti i paramtri (uno ad uno) in una tabella n a n
-                /*for (int i = 0; i < idParametriTorneo.Length; i++)
-                {
-                    sql = "";
-                    sql += "UPDATE ParametroTorneo " +
-                        "SET IDParametro=@IDParametro " +
-                        "WHERE IDTorneo=@"
-
-                }*/
-                return "Info cambiate con successo";
-            }
-            catch (Exception e)
-            {
-                return "ERRORE: " + e.Message;
             }
         }
         public string AssegnaArbitriPartita(int idArbitro1, int idArbitro2, int idTorneo, int numPartita)

@@ -2459,6 +2459,17 @@ namespace WebAPIAuthJWT.Helpers
             List<int> idImpianti = new List<int>();
             try
             {
+                //Prendo l'IDTorneo
+                sql = "";
+                sql += "SELECT IDTorneo FROM Torneo WHERE Titolo=@titolotorneo";
+                comando = new SqlCommand(sql, conn);
+                comando.Parameters.Add(new SqlParameter("titolotorneo", titolo));
+                idTorneo = new DataTable();
+                adapter = new SqlDataAdapter(comando);
+                conn.Open();
+                adapter.Fill(idTorneo);
+                conn.Close();
+
                 //Creo il torneo
                 sql = "";
                 sql += "UPDATE Torneo SET ";
@@ -2482,10 +2493,10 @@ namespace WebAPIAuthJWT.Helpers
                     "RiunioneTecnica=@RiunioneTecnica," +
                     "OraInizio=@OraInizio," +
                     "Tour=@Tour ";
-                sql += "WHERE IDTorneo=@idtorneo;";
+                sql += "WHERE IDTorneo=@IDTorneo";
                 comando = new SqlCommand(sql, conn);
-                parametro = new SqlParameter("idtorneo", idT);
-                comando = new SqlCommand(sql, conn);
+                parametro = new SqlParameter("IDTorneo", idTorneo.Rows[0][0]);
+                comando.Parameters.Add(parametro);
                 parametro = new SqlParameter("IDSocieta", idSocieta);
                 comando.Parameters.Add(parametro);
                 parametro = new SqlParameter("IDTipoTorneo", tipoTorneo);
@@ -2551,16 +2562,6 @@ namespace WebAPIAuthJWT.Helpers
                     if (query.Rows.Count > 0)
                         idParametriTorneo.Add(Convert.ToInt32(query.Rows[0][0]));
                 }
-                //Prendo l'IDTorneo
-                sql = "";
-                sql += "SELECT IDTorneo FROM Torneo WHERE Titolo=@titolotorneo";
-                comando = new SqlCommand(sql, conn);
-                comando.Parameters.Add(new SqlParameter("titolotorneo", titolo));
-                idTorneo = new DataTable();
-                adapter = new SqlDataAdapter(comando);
-                conn.Open();
-                adapter.Fill(idTorneo);
-                conn.Close();
                 //elimino tutti i parametri
                 sql = "";
                 sql += "DELETE FROM ParametroTorneo WHERE IDTorneo=@IDTorneo;";
